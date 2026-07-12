@@ -1,0 +1,10 @@
+MVP:
+- recreate comparative analysis posts with variables in the code
+
+V1.1:
+- recreate comparative analysis posts with variables read from text files
+- add images
+
+V2.0:
+- add comparisons for subversions (has a trait but opposite)
+- 
