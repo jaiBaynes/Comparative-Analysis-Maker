@@ -26,7 +26,7 @@ def main():
                                     FeatureStatus.NONE, FeatureStatus.NONE, FeatureStatus.PARTIAL])
 
     left = [a, b]
-    right = [c]
+    right = [c, a]
 
     out = viz.export_image(left, right, title='The Many Other ZEUSes (demo)')
     print('Saved image to', out)

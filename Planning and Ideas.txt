@@ -7,4 +7,4 @@ V1.1:
 
 V2.0:
 - add comparisons for subversions (has a trait but opposite)
-- 
+- add comparison symbol for inversion ( a feature that is now the opposite)

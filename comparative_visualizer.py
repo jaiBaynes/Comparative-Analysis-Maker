@@ -9,17 +9,17 @@ from typing import List, Tuple
 
 # Default layout constants (easy to tweak)
 DEFAULT_CANVAS_SIZE = (1080, 1350)
-DEFAULT_LEFT_MARGIN = 40
+DEFAULT_LEFT_MARGIN = 60
 DEFAULT_TOP_MARGIN = 40
-DEFAULT_NAME_COL = 260
-DEFAULT_ROW_HEIGHT = 56
-DEFAULT_FEATURE_SIZE = 28
-DEFAULT_FEATURE_SPACING = 60
+DEFAULT_NAME_COL = 140
+DEFAULT_ROW_HEIGHT = 72
+DEFAULT_FEATURE_SIZE = 20
+DEFAULT_FEATURE_SPACING = 40
 DEFAULT_LEGEND_HEIGHT = 140
-DEFAULT_FONT_SIZE = 15
-DEFAULT_TITLE_FONT_SIZE = 36
+DEFAULT_FONT_SIZE = 24
+DEFAULT_TITLE_FONT_SIZE = 48
 DEFAULT_TOP_IMAGE_SPACE = 500
-DEFAULT_SWATCH_SPACING = 170
+DEFAULT_SWATCH_SPACING = 140
 DEFAULT_UNDERLINE_OFFSET = 6
 DEFAULT_UNDERLINE_THICKNESS = 4
 
@@ -181,12 +181,15 @@ class Visualizer:
             surf = self.font.render(line, True, (25, 25, 25))
             surface.blit(surf, (x, y + i * (self.font.get_linesize() + 2)))
 
-    def draw_comparand_row(self, surface: pygame.Surface, comparand: Comparand, index: int, x: int, y: int):
+    def draw_comparand_row(self, surface: pygame.Surface, comparand: Comparand, index: int, x: int, y: int, col_width: int = None):
         # name
+        # draw title above the marker row
         name_surf = self.font.render(comparand.name, True, (10, 10, 10))
-        surface.blit(name_surf, (x + 4, y + (self.row_height - name_surf.get_height()) // 2))
+        name_x = x + 4
+        name_y = y - (self.row_height // 2)
+        surface.blit(name_surf, (name_x, name_y))
 
-        # score: show fraction and percentage
+        # score: show fraction and percentage at end of column
         points, percent = comparand.match_score()
         if points.is_integer():
             pts_text = f"{int(points)}/{len(comparand.feature_states)}"
@@ -194,18 +197,19 @@ class Visualizer:
             pts_text = f"{points:.1f}/{len(comparand.feature_states)}"
         score_text = f"{pts_text} = {int(round(percent))}%"
         score_surf = self.font.render(score_text, True, (80, 80, 80))
-        surface.blit(score_surf, (x + self.name_col - 120, y + (self.row_height - score_surf.get_height()) // 2))
+
+        # determine column width if not provided
+        if col_width is None:
+            col_width = (self.canvas_width - 2 * self.left_margin) // 2
 
         # feature markers -- dynamic spacing to fit all features in available width
         start_x = x + self.name_col
         cy = y + self.row_height // 2
+        available = max(100, col_width - (self.name_col + 20))
 
-        # estimate available width to the right edge of column
-        # assume columns are half the canvas width (render_columns uses half); fallback to canvas width
-        col_right = x + (self.canvas_width - 2 * self.left_margin) // 2 if x > self.left_margin else self.canvas_width - self.left_margin
-        available = max(200, col_right - start_x - 20)
-        eff_spacing = max(6, available // max(1, self.n_features))
-        eff_feature_size = min(self.feature_size, int(eff_spacing * 0.75))
+        # determine effective feature size and spacing to keep markers close
+        eff_feature_size = min(self.feature_size, max(8, available // max(1, self.n_features) - 2))
+        eff_spacing = eff_feature_size + 2
 
         for i in range(self.n_features):
             fx = start_x + i * eff_spacing
@@ -217,7 +221,6 @@ class Visualizer:
                 pygame.draw.rect(surface, feature_color, rect)
                 pygame.draw.rect(surface, (0, 0, 0), rect, 2)
             elif state == FeatureStatus.PARTIAL:
-                # draw filled circle and an underline using feature color
                 center = (fx + eff_feature_size // 2, cy)
                 pygame.draw.circle(surface, feature_color, center, eff_feature_size // 2)
                 pygame.draw.circle(surface, (0, 0, 0), center, eff_feature_size // 2, 2)
@@ -225,12 +228,16 @@ class Visualizer:
                 ul_end = (center[0] + eff_feature_size // 2 - 2, center[1] + eff_feature_size // 2 + self.underline_offset)
                 pygame.draw.line(surface, feature_color, ul_start, ul_end, max(1, self.underline_thickness - 1))
             else:
-                # NONE -> empty gray square outline and an X in none_marker_color
                 rect = pygame.Rect(fx, cy - eff_feature_size // 2, eff_feature_size, eff_feature_size)
                 pygame.draw.rect(surface, (230, 230, 230), rect)
                 pygame.draw.rect(surface, (120, 120, 120), rect, 1)
                 pygame.draw.line(surface, self.none_marker_color, (fx + 2, cy - eff_feature_size // 2 + 2), (fx + eff_feature_size - 2, cy + eff_feature_size // 2 - 2), 1)
                 pygame.draw.line(surface, self.none_marker_color, (fx + eff_feature_size - 2, cy - eff_feature_size // 2 + 2), (fx + 2, cy + eff_feature_size // 2 - 2), 1)
+
+        # draw score at right edge of column
+        score_x = x + col_width - score_surf.get_width() - 8
+        score_y = y - (self.row_height // 2)
+        surface.blit(score_surf, (score_x, score_y))
 
     def render(self, comparands: List[Comparand], title: str = 'Comparative Analysis'):
         # backward-compatible single-column render moved to two-column API below
@@ -274,7 +281,7 @@ class Visualizer:
                 row_rect = pygame.Rect(left_x - 10, row_y - 6, col_width - 10, self.row_height - 4)
                 pygame.draw.rect(surface, (255, 255, 255), row_rect)
                 pygame.draw.rect(surface, (220, 220, 220), row_rect, 1)
-                self.draw_comparand_row(surface, left_list[idx], idx, left_x, row_y)
+                self.draw_comparand_row(surface, left_list[idx], idx, left_x, row_y, col_width=col_width)
 
             # right row
             if idx < len(right_list):
@@ -282,7 +289,7 @@ class Visualizer:
                 row_rect = pygame.Rect(right_x - 10, row_y - 6, col_width - 10, self.row_height - 4)
                 pygame.draw.rect(surface, (255, 255, 255), row_rect)
                 pygame.draw.rect(surface, (220, 220, 220), row_rect, 1)
-                self.draw_comparand_row(surface, right_list[idx], idx, right_x, row_y)
+                self.draw_comparand_row(surface, right_list[idx], idx, right_x, row_y, col_width=col_width)
 
         return surface
 
@@ -353,4 +360,8 @@ if __name__ == '__main__':
                                     FeatureStatus.PERFECT, FeatureStatus.PERFECT, FeatureStatus.NONE,
                                     FeatureStatus.NONE, FeatureStatus.NONE, FeatureStatus.PARTIAL])
 
-    viz.render([a, b, c], title='The Many Other ZEUSes (demo)')
+    left = [a, b]
+    right = [c]
+    out = viz.export_image(left, right, title='The Many Other ZEUSes (demo)')
+    print('Saved image to', out)
+    viz.render_columns(left, right, title='The Many Other ZEUSes (demo)')
