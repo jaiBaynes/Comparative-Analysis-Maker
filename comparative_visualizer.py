@@ -121,19 +121,21 @@ class Visualizer:
         title = self.title_font.render('Legend', True, (20, 20, 20))
         surface.blit(title, (x, y))
         y += 40
-
-        # feature swatches
+        # feature swatches with wrapping
+        cur_x = x
+        cur_y = y
+        start_x = x
+        max_x = self.canvas_width - self.left_margin
+        item_gap = 12
+        sw = self.feature_size
         for i, label in enumerate(self.feature_labels):
-            cx = x + (i % 6) * self.swatch_spacing
-            cy = y + (i // 6) * (self.font.get_linesize() + 8)
             color = self.feature_colors[i % len(self.feature_colors)]
-            rect = pygame.Rect(cx, cy, 24, 24)
-            pygame.draw.rect(surface, color, rect)
-            lbl = self.font.render(label, True, (30, 30, 30))
-            surface.blit(lbl, (cx + 34, cy + 4))
+            cur_x, cur_y = self._place_legend_item(surface, label, color, cur_x, cur_y, start_x, max_x, sw, item_gap)
+        # advance y after legend items
+        y = cur_y + self.font.get_linesize() + 8
 
         # symbol legend (below feature swatches)
-        sy = y + ((len(self.feature_labels) - 1) // 6 + 1) * (self.font.get_linesize() + 8) + 18
+        sy = y + 18
         sym_x = x
         # perfect: filled rectangle (marker color)
         pr = pygame.Rect(sym_x, sy, self.feature_size, self.feature_size)
@@ -160,6 +162,29 @@ class Visualizer:
         pygame.draw.line(surface, self.none_marker_color, (sym_x + 3, sy + 3), (sym_x + self.feature_size - 3, sy + self.feature_size - 3), 2)
         pygame.draw.line(surface, self.none_marker_color, (sym_x + self.feature_size - 3, sy + 3), (sym_x + 3, sy + self.feature_size - 3), 2)
         surface.blit(self.font.render('No match (X)', True, (30, 30, 30)), (sym_x + self.feature_size + 14, sy + 2))
+
+    def _place_legend_item(self, surface: pygame.Surface, label: str, color: Tuple[int, int, int], cur_x: int, cur_y: int, start_x: int, max_x: int, sw: int, item_gap: int) -> Tuple[int, int]:
+        """Place a legend swatch+label at (cur_x, cur_y). If it would exceed max_x, wrap to next line.
+        Returns new (cur_x, cur_y) position for the next item.
+        """
+        # measure text width
+        text_w, text_h = self.font.size(label)
+        total_w = sw + 6 + text_w + item_gap
+        if cur_x + total_w > max_x:
+            # wrap to next line
+            cur_x = start_x
+            cur_y = cur_y + self.font.get_linesize() + 8
+
+        # draw swatch
+        rect = pygame.Rect(cur_x, cur_y, sw, sw)
+        pygame.draw.rect(surface, color, rect)
+        pygame.draw.rect(surface, (0, 0, 0), rect, 1)
+        # draw label next to swatch
+        lbl = self.font.render(label, True, (30, 30, 30))
+        surface.blit(lbl, (cur_x + sw + 6, cur_y + max(0, (sw - text_h) // 2)))
+
+        # return position for next item
+        return cur_x + total_w, cur_y
 
     def draw_definition(self, surface: pygame.Surface, x: int, y: int, max_width: int, text: str):
         # simple word-wrapping then draw lines
