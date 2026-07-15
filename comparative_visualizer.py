@@ -124,7 +124,7 @@ class Visualizer:
         return self.canvas_width, self.canvas_height
 
     def draw_legend(self, surface: pygame.Surface, x: int, y: int):
-        title = self.title_font.render('Legend', True, (20, 20, 20))
+        title = self.title_font.render('Legend of Commonalities for Comparative Analysis', True, (20, 20, 20))
         title_x = (self.canvas_width - title.get_width()) // 2
         surface.blit(title, (title_x, y))
         y += 40 
