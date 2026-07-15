@@ -124,10 +124,10 @@ class Visualizer:
         title = self.title_font.render('Legend', True, (20, 20, 20))
         title_x = (self.canvas_width - title.get_width()) // 2
         surface.blit(title, (title_x, y))
-        y += 40
+        y += 40 
         # feature swatches with wrapping
         cur_x = x
-        cur_y = y
+        cur_y = y 
         start_x = x
         max_x = self.canvas_width - self.canvas_margin
         item_gap = 12
@@ -139,7 +139,7 @@ class Visualizer:
         y = cur_y + self.font.get_linesize() + 8
 
         # symbol legend (below feature swatches)
-        sy = y + 18
+        sy = y + 18 
         sym_x = x
         # perfect: filled rectangle (marker color)
         pr = pygame.Rect(sym_x, sy, self.feature_size, self.feature_size)
@@ -303,11 +303,11 @@ class Visualizer:
 
         # legend (below definition)
         legend_x = self.canvas_margin
-        legend_y = def_y + def_h + 8
+        legend_y = def_y + def_h + 8 + self.top_image_space
         self.draw_legend(surface, legend_x, legend_y)
 
         # compute top y for comparand rows
-        start_y = legend_y + self.legend_height + self.top_image_space
+        start_y = legend_y + self.legend_height*1.6
 
         # layout columns
         col_width = (self.canvas_width - 2 * self.canvas_margin) // 2
