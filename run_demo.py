@@ -49,8 +49,7 @@ def load_from_txt(path: str) -> Tuple[List[str], List[Comparand]]:
 
 
 def main():
-    USE_DEMO = False
-    SOURCE = 'csv'  # 'hardcoded', 'csv', or 'txt'
+    SOURCE = "hardcoded" # 'csv'  # 'hardcoded', 'csv', or 'txt'
 
     demo_features = [
         'king of gods', 'eagle association', 'lustful/seducer', 'cognates', 'fight serpent',
@@ -73,10 +72,10 @@ def main():
                                          FeatureStatus.PERFECT, FeatureStatus.PERFECT, FeatureStatus.NONE,
                                          FeatureStatus.NONE, FeatureStatus.NONE, FeatureStatus.PARTIAL])
 
-    if USE_DEMO or SOURCE == 'hardcoded':
+    if SOURCE == 'hardcoded':
         features = demo_features
-        left = [demo_a, demo_b]
-        right = [demo_c]
+        left = [demo_a, demo_b, demo_c, demo_c, demo_c, demo_c]
+        right = [demo_c, demo_c, demo_c, demo_c, demo_c, demo_c]
     else:
         if SOURCE == 'csv':
             features, comps = load_from_csv('sample_data.csv')
