@@ -100,9 +100,9 @@ def main():
         right = comps[half:]
 
     viz = Visualizer(features)
-    out = viz.export_image(left, right, title='The Many Other ZEUSes (demo)')
+    out = viz.export_image(left, right, title=' ')
     print('Saved image to', out)
-    viz.render_columns(left, right, title='The Many Other ZEUSes (demo)')
+    #viz.render_columns(left, right, title='The Many Other ZEUSes (demo)') # Display in pygame window
 
 
 if __name__ == '__main__':
