@@ -13,15 +13,16 @@ DEFAULT_LEFT_MARGIN = 60
 DEFAULT_TOP_MARGIN = 40
 DEFAULT_NAME_COL = 140
 DEFAULT_ROW_HEIGHT = 72
-DEFAULT_FEATURE_SIZE = 20
+DEFAULT_FEATURE_SIZE = 32
 DEFAULT_FEATURE_SPACING = 40
 DEFAULT_LEGEND_HEIGHT = 140
-DEFAULT_FONT_SIZE = 24
+DEFAULT_FONT_SIZE = 30
 DEFAULT_TITLE_FONT_SIZE = 48
 DEFAULT_TOP_IMAGE_SPACE = 500
 DEFAULT_SWATCH_SPACING = 140
 DEFAULT_UNDERLINE_OFFSET = 6
 DEFAULT_UNDERLINE_THICKNESS = 4
+DEFAULT_CANVAS_MARGIN = 40
 
 # default marker colors
 DEFAULT_PERFECT_MARKER_COLOR = (0, 0, 0)
@@ -58,6 +59,7 @@ class Visualizer:
         feature_labels: List[str],
         canvas_size: Tuple[int, int] = DEFAULT_CANVAS_SIZE,
         top_image_space: int = DEFAULT_TOP_IMAGE_SPACE,
+        canvas_margin: int = DEFAULT_CANVAS_MARGIN,
         left_margin: int = DEFAULT_LEFT_MARGIN,
         top_margin: int = DEFAULT_TOP_MARGIN,
         name_col: int = DEFAULT_NAME_COL,
@@ -80,6 +82,7 @@ class Visualizer:
 
         # canvas and layout (all adjustable via parameters)
         self.canvas_width, self.canvas_height = canvas_size
+        self.canvas_margin = canvas_margin
         self.left_margin = left_margin
         self.top_margin = top_margin
         self.name_col = name_col
@@ -119,13 +122,14 @@ class Visualizer:
 
     def draw_legend(self, surface: pygame.Surface, x: int, y: int):
         title = self.title_font.render('Legend', True, (20, 20, 20))
-        surface.blit(title, (x, y))
+        title_x = (self.canvas_width - title.get_width()) // 2
+        surface.blit(title, (title_x, y))
         y += 40
         # feature swatches with wrapping
         cur_x = x
         cur_y = y
         start_x = x
-        max_x = self.canvas_width - self.left_margin
+        max_x = self.canvas_width - self.canvas_margin
         item_gap = 12
         sw = self.feature_size
         for i, label in enumerate(self.feature_labels):
@@ -206,11 +210,16 @@ class Visualizer:
             surf = self.font.render(line, True, (25, 25, 25))
             surface.blit(surf, (x, y + i * (self.font.get_linesize() + 2)))
 
+        # return total height used
+        return len(lines) * (self.font.get_linesize() + 2)
+
     def draw_comparand_row(self, surface: pygame.Surface, comparand: Comparand, index: int, x: int, y: int, col_width: int = None):
         # name
-        # draw title above the marker row
+        # draw title centered above the marker row
         name_surf = self.font.render(comparand.name, True, (10, 10, 10))
-        name_x = x + 4
+        if col_width is None:
+            col_width = (self.canvas_width - 2 * self.canvas_margin) // 2
+        name_x = int(x + (col_width - name_surf.get_width()) / 2)
         name_y = y - (self.row_height // 2)
         surface.blit(name_surf, (name_x, name_y))
 
@@ -228,9 +237,10 @@ class Visualizer:
             col_width = (self.canvas_width - 2 * self.left_margin) // 2
 
         # feature markers -- dynamic spacing to fit all features in available width
-        start_x = x + self.name_col
+        # left-justify markers inside the column with a small padding
+        start_x = x + 8
         cy = y + self.row_height // 2
-        available = max(100, col_width - (self.name_col + 20))
+        available = max(100, col_width - 16)
 
         # determine effective feature size and spacing to keep markers close
         eff_feature_size = min(self.feature_size, max(8, available // max(1, self.n_features) - 2))
@@ -242,22 +252,22 @@ class Visualizer:
             feature_color = self.feature_colors[i % len(self.feature_colors)]
 
             if state == FeatureStatus.PERFECT:
-                rect = pygame.Rect(fx, cy - eff_feature_size // 2, eff_feature_size, eff_feature_size)
+                rect = pygame.Rect(fx, cy - eff_feature_size*1.5, eff_feature_size, eff_feature_size)
                 pygame.draw.rect(surface, feature_color, rect)
                 pygame.draw.rect(surface, (0, 0, 0), rect, 2)
             elif state == FeatureStatus.PARTIAL:
-                center = (fx + eff_feature_size // 2, cy)
+                center = (fx + eff_feature_size // 2, cy  - eff_feature_size)
                 pygame.draw.circle(surface, feature_color, center, eff_feature_size // 2)
                 pygame.draw.circle(surface, (0, 0, 0), center, eff_feature_size // 2, 2)
-                ul_start = (center[0] - eff_feature_size // 2 + 2, center[1] + eff_feature_size // 2 + self.underline_offset)
-                ul_end = (center[0] + eff_feature_size // 2 - 2, center[1] + eff_feature_size // 2 + self.underline_offset)
+                ul_start = (center[0] - eff_feature_size // 2 + 2, center[1] + eff_feature_size // 2 + self.underline_offset//4)
+                ul_end = (center[0] + eff_feature_size // 2 - 2, center[1] + eff_feature_size // 2 + self.underline_offset//4)
                 pygame.draw.line(surface, feature_color, ul_start, ul_end, max(1, self.underline_thickness - 1))
             else:
-                rect = pygame.Rect(fx, cy - eff_feature_size // 2, eff_feature_size, eff_feature_size)
+                rect = pygame.Rect(fx, cy - eff_feature_size*1.5, eff_feature_size, eff_feature_size)
                 pygame.draw.rect(surface, (230, 230, 230), rect)
                 pygame.draw.rect(surface, (120, 120, 120), rect, 1)
-                pygame.draw.line(surface, self.none_marker_color, (fx + 2, cy - eff_feature_size // 2 + 2), (fx + eff_feature_size - 2, cy + eff_feature_size // 2 - 2), 1)
-                pygame.draw.line(surface, self.none_marker_color, (fx + eff_feature_size - 2, cy - eff_feature_size // 2 + 2), (fx + 2, cy + eff_feature_size // 2 - 2), 1)
+                pygame.draw.line(surface, self.none_marker_color, (fx + 2, cy - eff_feature_size*1.5 + 2), (fx + eff_feature_size - 2, cy - eff_feature_size//2 - 2), 1)
+                pygame.draw.line(surface, self.none_marker_color, (fx + eff_feature_size - 2, cy - eff_feature_size*1.5 + 2), (fx + 2, cy - eff_feature_size//2 - 2), 1)
 
         # draw score at right edge of column
         score_x = x + col_width - score_surf.get_width() - 8
@@ -275,25 +285,34 @@ class Visualizer:
 
         # title
         title_surf = self.title_font.render(title, True, (15, 15, 15))
-        surface.blit(title_surf, (self.left_margin, 8))
 
         # definition
         def_text = (
             'Comparands: Figures or plots that contain vague similarities but distinct differences across cultures. '
             'Unlike cognates, these figures share thematic or aesthetic traits that outlive their originals.'
         )
-        self.draw_definition(surface, self.left_margin, 48, self.canvas_width - self.left_margin * 2, def_text)
+        # title (centered)
+        title_y = self.canvas_margin
+        title_x = (self.canvas_width - title_surf.get_width()) // 2
+        surface.blit(title_surf, (title_x, title_y))
 
-        # legend
-        self.draw_legend(surface, self.left_margin, self.top_margin + 120)
+        # definition (below title)
+        def_x = self.canvas_margin
+        def_y = title_y + title_surf.get_height() + 8
+        def_h = self.draw_definition(surface, def_x, def_y, self.canvas_width - 2 * self.canvas_margin, def_text)
+
+        # legend (below definition)
+        legend_x = self.canvas_margin
+        legend_y = def_y + def_h + 8
+        self.draw_legend(surface, legend_x, legend_y)
 
         # compute top y for comparand rows
-        start_y = self.top_margin + self.legend_height + self.top_image_space
+        start_y = legend_y + self.legend_height + self.top_image_space
 
         # layout columns
-        col_width = (self.canvas_width - 2 * self.left_margin) // 2
-        left_x = self.left_margin
-        right_x = self.left_margin + col_width
+        col_width = (self.canvas_width - 2 * self.canvas_margin) // 2
+        left_x = self.canvas_margin
+        right_x = self.canvas_margin + col_width
 
         left_list = left_list or []
         right_list = right_list or []
@@ -303,17 +322,12 @@ class Visualizer:
             # left row
             if idx < len(left_list):
                 row_y = start_y + idx * self.row_height
-                row_rect = pygame.Rect(left_x - 10, row_y - 6, col_width - 10, self.row_height - 4)
-                pygame.draw.rect(surface, (255, 255, 255), row_rect)
-                pygame.draw.rect(surface, (220, 220, 220), row_rect, 1)
+                # draw comparand row without white box; title centered above, symbols left-justified inside column
                 self.draw_comparand_row(surface, left_list[idx], idx, left_x, row_y, col_width=col_width)
 
             # right row
             if idx < len(right_list):
                 row_y = start_y + idx * self.row_height
-                row_rect = pygame.Rect(right_x - 10, row_y - 6, col_width - 10, self.row_height - 4)
-                pygame.draw.rect(surface, (255, 255, 255), row_rect)
-                pygame.draw.rect(surface, (220, 220, 220), row_rect, 1)
                 self.draw_comparand_row(surface, right_list[idx], idx, right_x, row_y, col_width=col_width)
 
         return surface
