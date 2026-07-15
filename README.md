@@ -19,7 +19,8 @@ What the app does
 -----------------
 - Renders a comparative visual analysis of a base "original" (implicit) and a set of comparands.
 - Displays up to 12 feature columns per comparand with three states: perfect (filled rectangle), partial/disputed (underlined filled circle), or none (square with X).
-- Draws a legend (auto-wrapping), title, definition text and two columns of comparands.
+- Draws a centered title, definition text, a legend below the definition, and two columns of comparands.
+- Comparand names are centered above each row of feature markers; score text is rendered in a smaller font to the right of the final marker.
 - Can export the rendered canvas to PNG files (auto-incremented filenames) in `output_images/`.
 
 Files of interest
@@ -54,12 +55,14 @@ JUPITER (Roman),PERFECT,PERFECT,PARTIAL,NONE,PERFECT,...
 Customization
 -------------
 - Top-level layout constants are defined in `comparative_visualizer.py` (near the top):
-	- `DEFAULT_CANVAS_SIZE`, `DEFAULT_LEFT_MARGIN`, `DEFAULT_NAME_COL`, `DEFAULT_ROW_HEIGHT`,
-		`DEFAULT_FEATURE_SIZE`, `DEFAULT_SWATCH_SPACING`, `DEFAULT_FONT_SIZE`, `DEFAULT_TITLE_FONT_SIZE`, etc.
+	- `DEFAULT_CANVAS_SIZE`, `DEFAULT_CANVAS_MARGIN`, `DEFAULT_LEFT_MARGIN`, `DEFAULT_NAME_COL`, `DEFAULT_ROW_HEIGHT`,
+		`DEFAULT_FEATURE_SIZE`, `DEFAULT_SWATCH_SPACING`, `DEFAULT_FONT_SIZE`, `DEFAULT_SMALL_FONT_SIZE`, `DEFAULT_TITLE_FONT_SIZE`, `DEFAULT_TOP_IMAGE_SPACE`, etc.
+- The current renderer uses `top_image_space` to leave a gap between the definition and the legend. The legend height is used to position comparand rows below the legend.
+- Comparand titles are centered above their row; scores are rendered in `DEFAULT_SMALL_FONT_SIZE` and placed near the right side of the marker row.
 - To change visual sizes or spacing, either edit those `DEFAULT_*` variables or pass overrides when creating a `Visualizer` instance:
 
 ```python
-viz = Visualizer(features, canvas_size=(1080,1350), feature_size=24, name_col=160)
+viz = Visualizer(features, canvas_size=(1080,1350), feature_size=24, name_col=160, small_font_size=18)
 ```
 
 Exporting images
@@ -73,7 +76,8 @@ Extending the app
 
 Troubleshooting
 ---------------
-- If markers overlap or don't fit, adjust `DEFAULT_FEATURE_SIZE` and `DEFAULT_ROW_HEIGHT` in `comparative_visualizer.py`.
+- If markers overlap or don't fit, adjust `DEFAULT_FEATURE_SIZE`, `DEFAULT_ROW_HEIGHT`, or `DEFAULT_CANVAS_MARGIN` in `comparative_visualizer.py`.
+- If the legend or comparands are too close, adjust `DEFAULT_TOP_IMAGE_SPACE`.
 - If fonts don't look right on your OS, change `pygame.font.SysFont(None, size)` calls in the constructor.
 
 License & attribution

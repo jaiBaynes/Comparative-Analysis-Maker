@@ -18,9 +18,15 @@ def load_from_csv(path: str) -> Tuple[List[str], List[Comparand]]:
         rows = [r for r in reader if any(cell.strip() for cell in r)]
     if not rows:
         return [], []
-    features = [c.strip() for c in rows[0] if c.strip()]
+    header = [c.strip() for c in rows[0] if c.strip()]
+    if header and header[0].upper() == 'NEW_COMPARISON':
+        features = header[1:]
+    else:
+        features = header
     comparands: List[Comparand] = []
     for r in rows[1:]:
+        if not any(cell.strip() for cell in r):
+            continue
         name = r[0].strip()
         states = [parse_state(tok) for tok in r[1:1+len(features)]]
         comparands.append(Comparand(name, states))
@@ -34,13 +40,19 @@ def load_from_txt(path: str) -> Tuple[List[str], List[Comparand]]:
         lines = [l.rstrip('\n') for l in f if l.strip()]
     if not lines:
         return [], []
-    features = [c.strip() for c in lines[0].split(',') if c.strip()]
+    header = [c.strip() for c in lines[0].split(',') if c.strip()]
+    if header and header[0].upper() == 'NEW_COMPARISON':
+        features = header[1:]
+    else:
+        features = header
     for line in lines[1:]:
         if '|' in line:
             name, rest = line.split('|', 1)
             tokens = [t.strip() for t in rest.split(',') if t.strip()]
         else:
             parts = [p.strip() for p in line.split(',') if p.strip()]
+            if not parts:
+                continue
             name = parts[0]
             tokens = parts[1:]
         states = [parse_state(tok) for tok in tokens[:len(features)]]
