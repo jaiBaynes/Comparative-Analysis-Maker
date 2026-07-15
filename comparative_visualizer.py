@@ -16,6 +16,7 @@ DEFAULT_ROW_HEIGHT = 72
 DEFAULT_FEATURE_SIZE = 32
 DEFAULT_FEATURE_SPACING = 40
 DEFAULT_LEGEND_HEIGHT = 140
+DEFAULT_SMALL_FONT_SIZE = 20
 DEFAULT_FONT_SIZE = 30
 DEFAULT_TITLE_FONT_SIZE = 48
 DEFAULT_TOP_IMAGE_SPACE = 500
@@ -75,6 +76,7 @@ class Visualizer:
         perfect_marker_color: Tuple[int, int, int] = DEFAULT_PERFECT_MARKER_COLOR,
         partial_marker_color: Tuple[int, int, int] = DEFAULT_PARTIAL_MARKER_COLOR,
         none_marker_color: Tuple[int, int, int] = DEFAULT_NONE_MARKER_COLOR,
+        small_font_size: int = DEFAULT_SMALL_FONT_SIZE,
     ):
         pygame.init()
         self.feature_labels = feature_labels[:12]
@@ -90,6 +92,7 @@ class Visualizer:
         self.feature_size = feature_size
         self.feature_spacing = feature_spacing
         self.legend_height = legend_height
+        self.small_font = pygame.font.SysFont(None, small_font_size)
         self.font = pygame.font.SysFont(None, font_size)
         self.title_font = pygame.font.SysFont(None, title_font_size)
         self.top_image_space = top_image_space
@@ -230,7 +233,7 @@ class Visualizer:
         else:
             pts_text = f"{points:.1f}/{len(comparand.feature_states)}"
         score_text = f"{pts_text} = {int(round(percent))}%"
-        score_surf = self.font.render(score_text, True, (80, 80, 80))
+        score_surf = self.small_font.render(score_text, True, (0, 0, 0))
 
         # determine column width if not provided
         if col_width is None:
@@ -270,8 +273,8 @@ class Visualizer:
                 pygame.draw.line(surface, self.none_marker_color, (fx + eff_feature_size - 2, cy - eff_feature_size*1.5 + 2), (fx + 2, cy - eff_feature_size//2 - 2), 1)
 
         # draw score at right edge of column
-        score_x = x + col_width - score_surf.get_width() - 8
-        score_y = y - (self.row_height // 2)
+        score_x = x + col_width - score_surf.get_width()
+        score_y = y
         surface.blit(score_surf, (score_x, score_y))
 
     def render(self, comparands: List[Comparand], title: str = 'Comparative Analysis'):
