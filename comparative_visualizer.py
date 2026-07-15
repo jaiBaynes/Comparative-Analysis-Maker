@@ -142,7 +142,7 @@ class Visualizer:
         y = cur_y + self.font.get_linesize() + 8
 
         # symbol legend (below feature swatches)
-        sy = y + 18 
+        sy = y + 8 
         sym_x = x
         # perfect: filled rectangle (marker color)
         pr = pygame.Rect(sym_x, sy, self.feature_size, self.feature_size)
@@ -180,7 +180,7 @@ class Visualizer:
         if cur_x + total_w > max_x:
             # wrap to next line
             cur_x = start_x
-            cur_y = cur_y + self.font.get_linesize() + 8
+            cur_y = cur_y + self.font.get_linesize()*1.2 + 8
 
         # draw swatch
         rect = pygame.Rect(cur_x, cur_y, sw, sw)

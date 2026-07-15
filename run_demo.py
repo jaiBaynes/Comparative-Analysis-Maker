@@ -49,7 +49,7 @@ def load_from_txt(path: str) -> Tuple[List[str], List[Comparand]]:
 
 
 def main():
-    SOURCE = "hardcoded" # 'csv'  # 'hardcoded', 'csv', or 'txt'
+    SOURCE = 'csv'  # 'hardcoded', 'csv', or 'txt'
 
     demo_features = [
         'king of gods', 'eagle association', 'lustful/seducer', 'cognates', 'fight serpent',
