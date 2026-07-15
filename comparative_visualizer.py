@@ -69,6 +69,7 @@ class Visualizer:
         feature_spacing: int = DEFAULT_FEATURE_SPACING,
         legend_height: int = DEFAULT_LEGEND_HEIGHT,
         font_size: int = DEFAULT_FONT_SIZE,
+        mid_size: int = int(DEFAULT_TITLE_FONT_SIZE*0.8),
         title_font_size: int = DEFAULT_TITLE_FONT_SIZE,
         swatch_spacing: int = DEFAULT_SWATCH_SPACING,
         underline_offset: int = DEFAULT_UNDERLINE_OFFSET,
@@ -94,6 +95,7 @@ class Visualizer:
         self.legend_height = legend_height
         self.small_font = pygame.font.SysFont(None, small_font_size)
         self.font = pygame.font.SysFont(None, font_size)
+        self.mid_font = pygame.font.SysFont(None, mid_size)
         self.title_font = pygame.font.SysFont(None, title_font_size)
         self.top_image_space = top_image_space
         self.swatch_spacing = swatch_spacing
@@ -111,9 +113,9 @@ class Visualizer:
             (50, 205, 50),
             (0, 128, 255),
             (75, 0, 130),
-            (199, 21, 133),
-            (160, 82, 45),
-            (70, 130, 180),
+            (255, 182, 193),
+            (64, 224, 208),
+            (90, 90, 90),
             (128, 0, 0),
             (0, 100, 0),
             (128, 0, 128),
@@ -221,7 +223,7 @@ class Visualizer:
         # draw title centered above the marker row
         if col_width is None:
             col_width = (self.canvas_width - 2 * self.canvas_margin) // 2
-        name_font = self.title_font if len(comparand.name) <= 25 else self.font
+        name_font = self.title_font if len(comparand.name) <= 25 else self.mid_font if len(comparand.name) <= 32 else self.font
         name_surf = name_font.render(comparand.name, True, (10, 10, 10))
         name_x = int(x + (col_width - name_surf.get_width()) / 2)
         name_y = y - (self.row_height // 2)
