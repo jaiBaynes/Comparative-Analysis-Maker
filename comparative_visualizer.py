@@ -284,8 +284,8 @@ class Visualizer:
 
     def render_to_surface(self, left_list: List[Comparand], right_list: List[Comparand] = None, title: str = 'Comparative Analysis') -> pygame.Surface:
         # create an off-screen surface and draw the full layout once
-        surface = pygame.Surface((self.canvas_width, self.canvas_height))
-        surface.fill((246, 236, 227))
+        surface = pygame.Surface((self.canvas_width, self.canvas_height),pygame.SRCALPHA)
+        # surface.fill((246, 236, 227)) #colored background
 
         # title
         title_surf = self.title_font.render(title, True, (15, 15, 15))
