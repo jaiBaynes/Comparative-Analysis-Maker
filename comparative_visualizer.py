@@ -219,12 +219,12 @@ class Visualizer:
     def draw_comparand_row(self, surface: pygame.Surface, comparand: Comparand, index: int, x: int, y: int, col_width: int = None):
         # name
         # draw title centered above the marker row
-        name_surf = self.font.render(comparand.name, True, (10, 10, 10))
+        name_surf = self.title_font.render(comparand.name, True, (10, 10, 10))
         if col_width is None:
             col_width = (self.canvas_width - 2 * self.canvas_margin) // 2
         name_x = int(x + (col_width - name_surf.get_width()) / 2)
         name_y = y - (self.row_height // 2)
-        surface.blit(name_surf, (name_x, name_y))
+        surface.blit(name_surf, (name_x, name_y - 10))
 
         # score: show fraction and percentage at end of column
         points, percent = comparand.match_score()
